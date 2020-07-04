@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FiTrash2 } from 'react-icons/fi';
 
 import incomeIcon from '../../assets/income.svg';
 import outcomeIcon from '../../assets/outcome.svg';
@@ -65,7 +66,21 @@ const Dashboard: React.FC = () => {
     }
 
     loadTransactions();
-  }, []);
+  }, [transactions]);
+
+  async function handleDelete(id: string): Promise<void> {
+    try {
+      await api.delete(`transactions/${id}`);
+
+      const updatedTransactions = transactions.filter(
+        transaction => transaction.id !== id,
+      );
+
+      setTransactions(updatedTransactions);
+    } catch (err) {
+      console.error(err.message);
+    }
+  }
 
   return (
     <>
@@ -97,14 +112,17 @@ const Dashboard: React.FC = () => {
 
         <TableContainer>
           <table>
-            <thead>
-              <tr>
-                <th>Título</th>
-                <th>Preço</th>
-                <th>Categoria</th>
-                <th>Data</th>
-              </tr>
-            </thead>
+            {transactions.length > 0 && (
+              <thead>
+                <tr>
+                  <th>Título</th>
+                  <th>Preço</th>
+                  <th>Categoria</th>
+                  <th>Data</th>
+                  <th>Opções</th>
+                </tr>
+              </thead>
+            )}
 
             <tbody>
               {transactions.map(transaction => (
@@ -116,6 +134,12 @@ const Dashboard: React.FC = () => {
                   </td>
                   <td>{transaction.category.title}</td>
                   <td>{transaction.formattedDate}</td>
+                  <td className="options">
+                    <FiTrash2
+                      onClick={() => handleDelete(transaction.id)}
+                      size={20}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>
